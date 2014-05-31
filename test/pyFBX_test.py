@@ -28,7 +28,7 @@ from ..pyfbx.FBXHeader import FBXHeader
 @fixture(autouse=True)
 def before():
 	# Set up before a test runs
-	f = open(os.path.join(os.path.dirname(__file__), 'model/WolfFBX_Binary_2012.fbx'), mode='rb')
+	f = open(os.path.join(os.path.dirname(__file__), 'model/WolfFBX_Binary_2012.FBX'), mode='rb')
 	binaryModelData = f.read()
 	f.close()
 	return { "model_data" : { "binary_2012": binaryModelData } }
