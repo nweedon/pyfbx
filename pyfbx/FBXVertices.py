@@ -20,42 +20,61 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDI
 USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 from .FBXBase import FBXBase
+from .FBXHeader import FBXHeader
 
 class FBXVertices(FBXBase):
 
-	header = { }
+	info = { }
 
 	def __init__(self, fbxBits):
 		super().__init__(fbxBits)
 
-		self.readVertices()
-		self.readVertexIndices()
-		self.readEdges()
+		self.header = FBXHeader(fbxBits)
+
+		self.read_vertices()
+		self.read_vertex_indices()
+		self.read_edges()
 
 	def get(self, key=None):
 		if key:
-			return self.header[key]
+			return self.info[key]
 
-		return self.header
+		return self.info
 
-	def readVertices(self):
-		self.header["VertexCount"] = (int)(self.findInt("Vertices") / 3)
-		self.header["Vertices"] = [];
+	def read_vertices(self):
+		# 'Vertices' appears more than once in FBXVersion 7.1
+		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
 
-		decomp = self.decompressStream(	self.findOffset("Vertices").end(0) + 13, 
-										self.findOffset("PolygonVertexIndex").start(0))
+		self.info["VertexCount"] = (int)(self.find_int("Vertices", group) / 3)
+		self.info["Vertices"] = [];
+		begin = self.find_position("Vertices", group) + 13
+		end = self.find_position("PolygonVertexIndex", group)
+
+		if self.header.is_data_compressed():
+			data = self.decompress_stream(begin, end)
+		else:
+			data = self.get_stream(begin, end)
 		
-		self.header["Vertices"] = self.unpackFloat3(decomp, self.header["VertexCount"])
+		self.info["Vertices"] = self.unpack_float3(data, self.info["VertexCount"])
 
-	def readVertexIndices(self):
-		self.header["VertexIndexCount"] = (int)(self.findInt("PolygonVertexIndex") / 3)
-		self.header["VertexIndices"] = [];
+	def read_vertex_indices(self):
+		# 'PolygonVertexIndex' appears more than once in FBXVersion 7.1
+		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
 
-		decomp = self.decompressStream( self.findOffset("PolygonVertexIndex").end(0) + 13,
-										self.findOffset("Edges").start(0))
+		self.info["VertexIndexCount"] = (int)(self.find_int("PolygonVertexIndex", group) / 3)
+		self.info["VertexIndices"] = [];
+		begin = self.find_position("PolygonVertexIndex", group) + 13
+		end = self.find_position("Edges", group)
 
-		self.header["VertexIndices"] = self.unpackInt3(decomp, self.header["VertexIndexCount"])
+		if self.header.is_data_compressed():
+			data = self.decompress_stream(begin, end)
+		else:
+			data = self.get_stream(begin, end)
 
-	def readEdges(self):
-		self.header["EdgeCount"] = (int)(self.findInt("Edges"))
-		self.header["Edges"] = ["Not implemented."];
+		self.info["VertexIndices"] = self.unpack_int3(data, self.info["VertexIndexCount"])
+
+	def read_edges(self):
+		# 'Edges' appears more than once in FBXVersion 7.1
+		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
+		self.info["EdgeCount"] = (int)(self.find_int("Edges", group))
+		self.info["Edges"] = ["Not implemented."];

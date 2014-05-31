@@ -31,8 +31,11 @@ class FBXHeader(FBXBase):
 
 		# Read integer values
 		for value in self.intValues:
-			self.header[value] = self.findInt(value)
+			self.header[value] = self.find_int(value)
 
 	def get(self):
 		return self.header
+
+	def is_data_compressed(self):
+		return self.header["FBXVersion"] >= 7100
 

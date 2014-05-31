@@ -20,24 +20,35 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDI
 USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 from .FBXBase import FBXBase
+from .FBXHeader import FBXHeader
 
 class FBXNormals(FBXBase):
 
-	header = { }
+	info = { }
 
 	def __init__(self, fbxBits):
 		super().__init__(fbxBits)
 
-		self.header["NormalsCount"] = (int)(self.findInt("Normals") / 3)
-		self.header["Normals"] = [];
+		self.header = FBXHeader(fbxBits)
 
-		decomp = self.decompressStream(	self.findOffset("Normals").end(0) + 13, 
-										self.findOffset("IndexToDirect").start(0))
+		# 'Normals' appears more than once in FBXVersion 7.1
+		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
+
+		self.info["NormalsCount"] = (int)(self.find_int("Normals", group) / 3)
+		self.info["Normals"] = [];
+
+		begin = self.find_position("Normals", group) + 13
+		end = self.find_position("IndexToDirect", group)
+
+		if self.header.is_data_compressed():
+			data = self.decompress_stream(begin, end)
+		else:
+			data = self.get_stream(begin, end)
 		
-		self.header["Normals"] = self.unpackFloat3(decomp, self.header["NormalsCount"])
+		self.info["Normals"] = self.unpack_float3(data, self.info["NormalsCount"])
 
 	def get(self, key=None):
 		if key:
-			return self.header[key]
+			return self.info[key]
 
-		return self.header
+		return self.info

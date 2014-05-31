@@ -28,36 +28,75 @@ class FBXBase(object):
 	def __init__(self, fbxBits):
 		self.bits = fbxBits
 
-	def findOffset(self, search_term):
-		return re.search(bytes(search_term, 'ascii'), self.bits)
+	def find_count(self, searchTerm):
+		"""
+		Searches the FBX file for [searchTerm] and returns the number
+		of matches.
+		"""
+		return len(re.findall(bytes(searchTerm, 'ascii'), self.bits))
 
-	def find(self, search_term, length, offset):
-		match = self.findOffset(search_term)
+	def find_position(self, searchTerm, matchNum=0, end=True):
+		"""
+		Searches the FBX file for [searchTerm], and returns the position at
+		which it was found. By default, this function returns the end position 
+		of the first match. 
+		To override this, provide the relevant optional arguments, [matchNum] and/or [end].
+		"""
+		match = re.finditer(bytes(searchTerm, 'ascii'), self.bits)
 		if match:
-			index = match.end(0) + offset
-			return self.bits[index:index+length]
+			matchCount = self.find_count(searchTerm)
+			matchNum = 0 if (matchNum > matchCount - 1) else matchNum
+			i = 0
 
-	def findInt(self, search_term):
-		value = self.find(search_term, 4, 1)
+			for m in match:
+				if i == matchNum:
+					if end:
+						return m.end(0)
+					else:
+						return m.begin(0)
+				i += 1
+
+	def find(self, searchTerm, length, offset, matchNum=0):
+		"""
+		Searches the FBX file for [searchTerm] and returns [length] bytes
+		succeeding the position found by find_position, plus [offset]. 
+		"""
+		index = self.find_position(searchTerm, matchNum) + offset
+		return self.bits[index:index+length]
+
+	def find_int(self, searchTerm, group=0):
+		"""
+		Convenience function for finding the integer value succeeding
+		a structure definition, such as 'PolygonVertexIndex'.
+		"""
+		value = self.find(searchTerm, 4, 1, group)
 
 		if value != None:
 			return struct.unpack("i", value)[0]
 
 		return 0
 
-	def findDouble(self, search_term):
-		value = self.find(search_term, 8, 1)
+	def find_double(self, searchTerm, group=0):
+		"""
+		Convenience function for finding the double value succeeding
+		a structure definition, such as 'PolygonVertexIndex'.
+		"""
+		value = self.find(searchTerm, 8, 1, group)
 
 		if value != None:
 			return struct.unpack("d", value)[0]
 
 		return 0
 
-	def decompressStream(self, begin, end):
+	def get_stream(self, begin, end):
+		if self.bits:
+			return self.bits[begin:end]
+
+	def decompress_stream(self, begin, end):
 		if self.bits:
 			return zlib.decompress(self.bits[begin:end])
 
-	def unpackFloat3(self, decomp, count=1):
+	def unpack_float3(self, decomp, count=1):
 		if count == 1:
 			return struct.unpack("ddd", decomp[(i*24):(i*24)+24])
 		else:
@@ -68,7 +107,7 @@ class FBXBase(object):
 
 			return unpacked
 
-	def unpackInt3(self, decomp, count=1):
+	def unpack_int3(self, decomp, count=1):
 		if count == 1:
 			return struct.unpack("iii", decomp[(i*12):(i*12)+12])
 		else:

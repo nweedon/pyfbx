@@ -10,8 +10,17 @@ __Note:__ I have C# code prepared for other iterations of the FBX file format, h
 * Python 3.3
 
 ####Supported Versions
-* __Binary:__ 2012
+* __Binary:__ 2011, 2012, 2013
 * __ASCII:__ None (yet)
+
+####Supported Data
+* __FBX Header Information__
+	* FBXHeaderVersion, FBXVersion, EncryptionType
+* __Vertex Information__
+	* Vertices, VertexCount, VertexIndexCount, VertexIndices, EdgeCount
+* __Normals Information__
+	* NormalsCount, Normals
+
 
 ####Converting an FBX File
 ```

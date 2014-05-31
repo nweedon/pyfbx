@@ -68,8 +68,9 @@ if(__name__ == "__main__"):
 			fOut.write(json.dumps(jsonOut, sort_keys=True, indent=4))
 
 			fOut.close()
-		except Exception as e:
-			print(e)
+		except:
+			import traceback, sys
+			traceback.print_exc(file=sys.stdout)
 		finally:
 			print("Finished.")
 			sys.exit(-1);

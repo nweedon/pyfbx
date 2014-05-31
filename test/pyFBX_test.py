@@ -27,20 +27,26 @@ from ..pyfbx.FBXHeader import FBXHeader
 
 @fixture(autouse=True)
 def before():
-	# Set up before a test runs
-	f = open(os.path.join(os.path.dirname(__file__), 'model/WolfFBX_Binary_2012.FBX'), mode='rb')
-	binaryModelData = f.read()
-	f.close()
-	return { "model_data" : { "binary_2012": binaryModelData } }
+	data = { 
+		'model_data': [ ],
+		# FBX files to test against
+		'files': ['WolfFBX_Binary_2011', 'WolfFBX_Binary_2012', 'WolfFBX_Binary_2013']
+	}
 
+	for name in data['files']:
+		f = open(os.path.join(os.path.dirname(__file__), 'model/' + name + '.FBX'), mode='rb')
+		data['model_data'].append(f.read())
+		f.close()
+
+	return data
 
 def test_vertices(before):
 	# Test each instance of model data. Although the reader
 	# will eventually parse different FBX file versions, the output
 	# should be the same for all of them.
-	for data in before['model_data']:
-		print("Testing: " + data)
-		fbxVertices = FBXVertices(before['model_data'][data])
+	for i in range(0, len(before['model_data'])):
+		print("Testing: " + before['files'][i])
+		fbxVertices = FBXVertices(before['model_data'][i])
 		jsonOut = fbxVertices.get()
 		assert jsonOut["VertexCount"] == 1128
 		assert jsonOut["VertexIndexCount"] == 1726
@@ -50,19 +56,25 @@ def test_normals(before):
 	# Test each instance of model data. Although the reader
 	# will eventually parse different FBX file versions, the output
 	# should be the same for all of them.
-	for data in before['model_data']:
-		print("Testing: " + data)
-		fbxNormals = FBXNormals(before['model_data'][data])
+	for i in range(0, len(before['model_data'])):
+		print("Testing: " + before['files'][i])
+		fbxNormals = FBXNormals(before['model_data'][i])
 		jsonOut = fbxNormals.get()
 		assert jsonOut["NormalsCount"] == 5178
 		assert len(jsonOut["Normals"]) == 5178
 
-def test_fbx_2012(before):
-	print("Testing: binary_2012")
-	# Test all information relevant to 2012 FBX files.
-	fbxHeader = FBXHeader(before['model_data']['binary_2012'])
-	jsonOut = fbxHeader.get()
-	assert jsonOut["EncryptionType"] == 0
-	assert jsonOut["FBXHeaderVersion"] == 1003
-	# 7200 is the version for 2012 FBX files
-	assert jsonOut["FBXVersion"] == 7200
+def test_fbx_headers(before):
+	# Relative to the order of before.files
+	encryptionTypes = [0, 0, 0]
+	fbxVersions = [7100, 7200, 7300]
+	fbxHeaderVersions = [1003, 1003, 1003]
+
+	for i in range(0, len(before['model_data'])):
+		print("Testing: " + before['files'][i])
+		# Test all information relevant to each supported version
+		# of the FBX header.
+		fbxHeader = FBXHeader(before['model_data'][i])
+		jsonOut = fbxHeader.get()
+		assert jsonOut["EncryptionType"] == encryptionTypes[i]
+		assert jsonOut["FBXHeaderVersion"] == fbxHeaderVersions[i]
+		assert jsonOut["FBXVersion"] == fbxVersions[i]
