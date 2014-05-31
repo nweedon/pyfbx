@@ -20,4 +20,4 @@ $ python pyFBX.py [path_to_fbx_file]
 * If you want to work out how to use the Python modules themselves, check out the tests!
 
 ####Assets
-__Wolf Totem 3D Model:__ Currently used to test against. Credit to [https://www.linkedin.com/in/mooga24](Ricardo Catarino).
+__Wolf Totem 3D Model:__ Currently used to test against. Credit to [Ricardo Catarino](https://www.linkedin.com/in/mooga24).
