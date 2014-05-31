@@ -19,6 +19,7 @@ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR P
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
+import os
 from pytest import fixture
 from ..pyfbx.FBXVertices import FBXVertices
 from ..pyfbx.FBXNormals import FBXNormals
@@ -27,7 +28,7 @@ from ..pyfbx.FBXHeader import FBXHeader
 @fixture(autouse=True)
 def before():
 	# Set up before a test runs
-	f = open('test/model/WolfFBX_Binary_2012.fbx', mode='rb')
+	f = open(os.path.join(os.path.dirname(__file__), 'model/WolfFBX_Binary_2012.fbx'), mode='rb')
 	binaryModelData = f.read()
 	f.close()
 	return { "model_data" : { "binary_2012": binaryModelData } }
