@@ -1,5 +1,6 @@
 pyfbx
 =====
+[![Build Status](https://travis-ci.org/nweedon/pyfbx.svg?branch=master)](https://travis-ci.org/nweedon/pyfbx)
 
 pyfbx is a Python module designed to parse Kaydara/Autodesk's FBX 3D Model file format. I haven't ever really liked the official FBX SDK, so I did some work last year to figure out the most important parts of the FBX data structure. I managed to get a sizable amount of information parsed last year, however, the code wasn't very well written. The code was written in C# previously, but this time I've decided to write it in Python to make it as easy to understand as possible. 
 
