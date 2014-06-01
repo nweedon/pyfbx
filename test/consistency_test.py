@@ -25,41 +25,19 @@ from ..pyfbx.FBXVertices import FBXVertices
 from ..pyfbx.FBXNormals import FBXNormals
 from ..pyfbx.FBXHeader import FBXHeader
 
-def test_vertices(before):
+def test_vertices_consistency(before):
 	# Test each instance of model data. Although the reader
 	# will eventually parse different FBX file versions, the output
 	# should be the same for all of them.
 	for i in range(0, len(before['model_data'])):
 		print("Testing: " + before['files'][i])
 		fbxVertices = FBXVertices(before['model_data'][i])
-		jsonOut = fbxVertices.get()
-		assert jsonOut["VertexCount"] == 1128
-		assert jsonOut["VertexIndexCount"] == 1726
-		assert len(jsonOut["VertexIndices"]) == 1726
+		jsonOut = fbxVertices.get()["VertexIndices"]
+		# Test first and last values
+		assert jsonOut[0] == [84, 88, -7]
+		assert jsonOut[len(jsonOut) - 1] == [1123, 1125, -1122]
 
-def test_normals(before):
-	# Test each instance of model data. Although the reader
-	# will eventually parse different FBX file versions, the output
-	# should be the same for all of them.
-	for i in range(0, len(before['model_data'])):
-		print("Testing: " + before['files'][i])
-		fbxNormals = FBXNormals(before['model_data'][i])
-		jsonOut = fbxNormals.get()
-		assert jsonOut["NormalsCount"] == 5178
-		assert len(jsonOut["Normals"]) == 5178
-
-def test_fbx_headers(before):
-	# Relative to the order of before.files
-	encryptionTypes = [0, 0, 0]
-	fbxVersions = [7100, 7200, 7300]
-	fbxHeaderVersions = [1003, 1003, 1003]
-
-	for i in range(0, len(before['model_data'])):
-		print("Testing: " + before['files'][i])
-		# Test all information relevant to each supported version
-		# of the FBX header.
-		fbxHeader = FBXHeader(before['model_data'][i])
-		jsonOut = fbxHeader.get()
-		assert jsonOut["EncryptionType"] == encryptionTypes[i]
-		assert jsonOut["FBXHeaderVersion"] == fbxHeaderVersions[i]
-		assert jsonOut["FBXVersion"] == fbxVersions[i]
+		jsonOut = fbxVertices.get()["Vertices"]
+		assert jsonOut[0] == [4.894176483154297, -5.2721147537231445, 33.48030090332031]
+		assert jsonOut[len(jsonOut) - 1] == [27.58094024658203, 0.4144550561904907, 26.248268127441406]
+		

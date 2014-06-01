@@ -73,6 +73,14 @@ class FBXVertices(FBXBase):
 
 		self.info["VertexIndices"] = self.unpack_int3(data, self.info["VertexIndexCount"])
 
+		# Indices are muddled in 2011 and 2013. See https://github.com/nweedon/pyfbx/issues/1
+		# for more information
+		affectedVersions = [7100, 7300]
+		if self.header.get()["FBXVersion"] in affectedVersions:
+			for i in range(0, len(self.info["VertexIndices"])):
+				vertex = self.info["VertexIndices"][i]
+				self.info["VertexIndices"][i] = [vertex[1], (vertex[2] * -1) - 1, (vertex[0] * -1) - 1]
+
 	def read_edges(self):
 		# 'Edges' appears more than once in FBXVersion 7.1
 		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
