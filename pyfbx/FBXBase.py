@@ -24,6 +24,9 @@ import struct
 import zlib
 
 class FBXBase(object):
+	INT3 = 0
+	FLOAT3 = 1
+	INT = 2
 
 	def __init__(self, fbxBits):
 		self.bits = fbxBits
@@ -128,3 +131,49 @@ class FBXBase(object):
 				unpacked.append(a[0])
 
 			return unpacked
+
+	def parse_section(self, section, next_section, data_type, count_modifier=None, affected_versions=[7100]):
+		"""
+		Parse a section of the FBX file. 
+		@param section The section of the file to parse_section
+		@param next_section The section immediately following section.
+		@param data_type Tells the function how to unpack the data (INT3, FLOAT3, INT)
+		@param count_modifier Lambda function which affects the read count
+		@param affected_versions The version numbers which are affected by duplicate 'keys' in the file
+			(i.e.: 'PolygonVertexIndex' appears more than once in versions 7.1 and 7.3)
+		@returns [count, unpacked_data]
+		"""
+		# Change to the second match if the header version of this file is
+		# affected by duplicate 'keys'.
+		group = 1 if (self.header.get()["FBXVersion"] in affected_versions) else 0
+
+		if not self.header:
+			self.header = FBXHeader(self.bits)
+
+		# Get the number of entires
+		count = (int)(self.find_int(section, group))
+
+		# Modify the count read, if count_modifer is provided
+		if count_modifier:
+			count = (int)(count_modifier(count))
+
+		# Calculate the data range
+		begin = self.find_position(section, group) + 13
+		end = self.find_position(next_section, group)
+
+		# Decompress the stream if the FBX Header version
+		# implements zlib compression
+		if self.header.is_data_compressed():
+			data = self.decompress_stream(begin, end)
+		else:
+			data = self.get_stream(begin, end)
+
+		# Unpack the data into something useful
+		if data_type == self.INT3:
+			unpacked = self.unpack_int3(data, count)
+		elif data_type == self.FLOAT3:
+			unpacked = self.unpack_float3(data, count)
+		elif data_type == self.INT:
+			unpacked = self.unpack_int(data, count)
+		
+		return [count, unpacked]

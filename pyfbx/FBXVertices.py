@@ -42,36 +42,10 @@ class FBXVertices(FBXBase):
 		return self.info
 
 	def read_vertices(self):
-		# 'Vertices' appears more than once in FBXVersion 7.1
-		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
-
-		self.info["VertexCount"] = (int)(self.find_int("Vertices", group) / 3)
-		self.info["Vertices"] = [];
-		begin = self.find_position("Vertices", group) + 13
-		end = self.find_position("PolygonVertexIndex", group)
-
-		if self.header.is_data_compressed():
-			data = self.decompress_stream(begin, end)
-		else:
-			data = self.get_stream(begin, end)
-		
-		self.info["Vertices"] = self.unpack_float3(data, self.info["VertexCount"])
+		self.info["VertexCount"], self.info["Vertices"] = self.parse_section("Vertices", "PolygonVertexIndex", self.FLOAT3, lambda count: count/3)
 
 	def read_vertex_indices(self):
-		# 'PolygonVertexIndex' appears more than once in FBXVersion 7.1
-		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
-
-		self.info["VertexIndexCount"] = (int)(self.find_int("PolygonVertexIndex", group) / 3)
-		self.info["VertexIndices"] = [];
-		begin = self.find_position("PolygonVertexIndex", group) + 13
-		end = self.find_position("Edges", group)
-
-		if self.header.is_data_compressed():
-			data = self.decompress_stream(begin, end)
-		else:
-			data = self.get_stream(begin, end)
-
-		self.info["VertexIndices"] = self.unpack_int3(data, self.info["VertexIndexCount"])
+		self.info["VertexIndexCount"], self.info["VertexIndices"] = self.parse_section("PolygonVertexIndex", "Edges", self.INT3, lambda count: count/3)
 
 		# Indices are muddled in 2011 and 2013. See https://github.com/nweedon/pyfbx/issues/1
 		# for more information
@@ -82,17 +56,4 @@ class FBXVertices(FBXBase):
 				self.info["VertexIndices"][i] = [vertex[1], (vertex[2] * -1) - 1, (vertex[0] * -1) - 1]
 
 	def read_edges(self):
-		# 'Edges' appears more than once in FBXVersion 7.1 and 7.3
-		affectedVersions = [7100, 7300]
-		group = 1 if (self.header.get()["FBXVersion"] in affectedVersions) else 0
-		self.info["EdgeCount"] = (int)(self.find_int("Edges", group))
-		self.info["Edges"] = [];
-		begin = self.find_position("Edges", group) + 13
-		end = self.find_position("GeometryVersion", group)
-
-		if self.header.is_data_compressed():
-			data = self.decompress_stream(begin, end)
-		else:
-			data = self.get_stream(begin, end)
-
-		self.info["Edges"] = self.unpack_int(data, self.info["EdgeCount"])
+		self.info["EdgeCount"], self.info["Edges"] = self.parse_section("Edges", "GeometryVersion", self.INT, affected_versions=[7100, 7300])
