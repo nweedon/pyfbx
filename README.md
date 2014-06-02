@@ -17,10 +17,17 @@ __Note:__ I have C# code prepared for other iterations of the FBX file format, h
 * __FBX Header Information__
 	* FBXHeaderVersion, FBXVersion, EncryptionType
 * __Vertex Information__
-	* Vertices, VertexCount, VertexIndexCount, VertexIndices, EdgeCount
+	* Vertices, VertexCount, VertexIndexCount, VertexIndices, EdgeCount, Edges
 * __Normals Information__
 	* NormalsCount, Normals
 
+####Upcoming/Planned Features
+* __UV's__
+	* UV Coordinates, UVIndex
+* __Properties__
+	* GlobalProperties, Documents, (more) Header Data, Metadata
+* __Animation__
+	* Deformers, Bones, Skeleton Hierarchy
 
 ####Converting an FBX File
 ```
