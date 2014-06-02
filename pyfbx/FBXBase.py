@@ -117,3 +117,14 @@ class FBXBase(object):
 				unpacked.append([x, y, z])
 
 			return unpacked
+
+	def unpack_int(self, decomp, count=1):
+		if count == 1:
+			return struct.unpack("i", decomp[(i*4):(i*4)+4])
+		else:
+			unpacked = []
+			for i in range(0, count):
+				a = struct.unpack("i", decomp[(i*4):(i*4)+4])
+				unpacked.append(a[0])
+
+			return unpacked

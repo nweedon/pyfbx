@@ -37,6 +37,9 @@ def test_vertices(before):
 		assert jsonOut["VertexIndexCount"] == 1726
 		assert len(jsonOut["VertexIndices"]) == 1726
 
+		assert jsonOut["EdgeCount"] == 2797
+		assert len(jsonOut["Edges"]) == 2797
+
 def test_normals(before):
 	# Test each instance of model data. Although the reader
 	# will eventually parse different FBX file versions, the output

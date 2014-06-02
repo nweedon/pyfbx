@@ -82,7 +82,17 @@ class FBXVertices(FBXBase):
 				self.info["VertexIndices"][i] = [vertex[1], (vertex[2] * -1) - 1, (vertex[0] * -1) - 1]
 
 	def read_edges(self):
-		# 'Edges' appears more than once in FBXVersion 7.1
-		group = 1 if (self.header.get()["FBXVersion"] == 7100) else 0
+		# 'Edges' appears more than once in FBXVersion 7.1 and 7.3
+		affectedVersions = [7100, 7300]
+		group = 1 if (self.header.get()["FBXVersion"] in affectedVersions) else 0
 		self.info["EdgeCount"] = (int)(self.find_int("Edges", group))
-		self.info["Edges"] = ["Not implemented."];
+		self.info["Edges"] = [];
+		begin = self.find_position("Edges", group) + 13
+		end = self.find_position("GeometryVersion", group)
+
+		if self.header.is_data_compressed():
+			data = self.decompress_stream(begin, end)
+		else:
+			data = self.get_stream(begin, end)
+
+		self.info["Edges"] = self.unpack_int(data, self.info["EdgeCount"])

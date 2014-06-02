@@ -40,4 +40,9 @@ def test_vertices_consistency(before):
 		jsonOut = fbxVertices.get()["Vertices"]
 		assert jsonOut[0] == [4.894176483154297, -5.2721147537231445, 33.48030090332031]
 		assert jsonOut[len(jsonOut) - 1] == [27.58094024658203, 0.4144550561904907, 26.248268127441406]
+
+		# Edge and normal values are idempotent per version, but
+		# export slightly differently across versions. As such, consistency
+		# tests cannot be run against these (until I find out whether there
+		# is something in the headers)
 		
