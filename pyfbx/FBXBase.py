@@ -91,6 +91,14 @@ class FBXBase(object):
 
 		return 0
 
+	def find_string(self, searchTerm, group=0, encoding='utf-8'):
+		"""
+		Convenience function for finding the string value succeeding
+		a structure definition, such as 'Creator'.
+		"""
+		length = self.find_int(searchTerm)
+		return self.find(searchTerm, length, 5, group).decode(encoding)
+
 	def get_stream(self, begin, end):
 		if self.bits:
 			return self.bits[begin:end]

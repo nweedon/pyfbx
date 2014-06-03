@@ -56,6 +56,7 @@ def test_fbx_headers(before):
 	encryptionTypes = [0, 0, 0]
 	fbxVersions = [7100, 7200, 7300]
 	fbxHeaderVersions = [1003, 1003, 1003]
+	fbxCreatorNames = ["FBX SDK/FBX Plugins version 2013.3", "FBX SDK/FBX Plugins version 2012.0", "FBX SDK/FBX Plugins version 2013.3"]
 
 	for i in range(0, len(before['model_data'])):
 		print("Testing: " + before['files'][i])
@@ -66,3 +67,6 @@ def test_fbx_headers(before):
 		assert jsonOut["EncryptionType"] == encryptionTypes[i]
 		assert jsonOut["FBXHeaderVersion"] == fbxHeaderVersions[i]
 		assert jsonOut["FBXVersion"] == fbxVersions[i]
+		# The actual version doesn't matter, we just need to test
+		# we actually get something useful
+		assert jsonOut["Creator"] == fbxCreatorNames[i]

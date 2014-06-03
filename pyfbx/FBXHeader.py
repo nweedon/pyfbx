@@ -25,6 +25,7 @@ class FBXHeader(FBXBase):
 
 	header = { }
 	intValues = ["FBXHeaderVersion", "FBXVersion", "EncryptionType"]
+	stringValues = ["Creator"]
 
 	def __init__(self, fbxBits):
 		super().__init__(fbxBits)
@@ -32,6 +33,10 @@ class FBXHeader(FBXBase):
 		# Read integer values
 		for value in self.intValues:
 			self.header[value] = self.find_int(value)
+
+		# Read string values
+		for string in self.stringValues:
+			self.header[string] = self.find_string(string)
 
 	def get(self):
 		return self.header
