@@ -7,7 +7,7 @@ pyfbx is a Python module designed to parse Kaydara/Autodesk's FBX 3D Model file 
 __Note:__ I have C# code prepared for other iterations of the FBX file format, however, I need to write them nicely in Python :) However, I do encourage collaboration from others!
 
 ####Prerequisites
-* Python 3.2, 3.3 and 3.4
+* Python 3.2, 3.3 or 3.4
 
 ####Supported Versions
 * __Binary:__ 2011, 2012, 2013
@@ -15,7 +15,7 @@ __Note:__ I have C# code prepared for other iterations of the FBX file format, h
 
 ####Supported Data
 * __FBX Header Information__
-	* FBXHeaderVersion, FBXVersion, EncryptionType
+	* FBXHeaderVersion, FBXVersion, EncryptionType, Creator
 * __Vertex Information__
 	* Vertices, VertexCount, VertexIndexCount, VertexIndices, EdgeCount, Edges
 * __Normals Information__
