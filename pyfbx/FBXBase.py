@@ -27,6 +27,8 @@ class FBXBase(object):
 	INT3 = 0
 	FLOAT3 = 1
 	INT = 2
+	INT2 = 3
+	FLOAT2 = 4
 
 	def __init__(self, fbxBits):
 		self.bits = fbxBits
@@ -118,6 +120,17 @@ class FBXBase(object):
 
 			return unpacked
 
+	def unpack_float2(self, decomp, count=1):
+		if count == 1:
+			return struct.unpack("dd", decomp[(i*16):(i*16)+16])
+		else:
+			unpacked = []
+			for i in range(0, count):
+				x, y = struct.unpack("dd", decomp[(i*16):(i*16)+16])
+				unpacked.append([x, y])
+
+			return unpacked
+
 	def unpack_int3(self, decomp, count=1):
 		if count == 1:
 			return struct.unpack("iii", decomp[(i*12):(i*12)+12])
@@ -126,6 +139,17 @@ class FBXBase(object):
 			for i in range(0, count):
 				x, y, z = struct.unpack("iii", decomp[(i*12):(i*12)+12])
 				unpacked.append([x, y, z])
+
+			return unpacked
+
+	def unpack_int2(self, decomp, count=1):
+		if count == 1:
+			return struct.unpack("ii", decomp[(i*8):(i*8)+8])
+		else:
+			unpacked = []
+			for i in range(0, count):
+				x, y = struct.unpack("ii", decomp[(i*8):(i*8)+8])
+				unpacked.append([x, y])
 
 			return unpacked
 
@@ -154,7 +178,7 @@ class FBXBase(object):
 		# Change to the second match if the header version of this file is
 		# affected by duplicate 'keys'.
 		group = 1 if (self.header.get()["FBXVersion"] in affected_versions) else 0
-
+		
 		if not self.header:
 			self.header = FBXHeader(self.bits)
 
@@ -183,5 +207,9 @@ class FBXBase(object):
 			unpacked = self.unpack_float3(data, count)
 		elif data_type == self.INT:
 			unpacked = self.unpack_int(data, count)
+		elif data_type == self.INT2:
+			unpacked = self.unpack_int2(data, count)
+		elif data_type == self.FLOAT2:
+			unpacked = self.unpack_float2(data, count)
 		
 		return [count, unpacked]

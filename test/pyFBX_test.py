@@ -24,6 +24,7 @@ from .unit import before
 from ..pyfbx.FBXVertices import FBXVertices
 from ..pyfbx.FBXNormals import FBXNormals
 from ..pyfbx.FBXHeader import FBXHeader
+from ..pyfbx.FBXTextures import FBXTextures
 
 def test_vertices(before):
 	# Test each instance of model data. Although the reader
@@ -70,3 +71,12 @@ def test_fbx_headers(before):
 		# The actual version doesn't matter, we just need to test
 		# we actually get something useful
 		assert jsonOut["Creator"] == fbxCreatorNames[i]
+
+def test_uvs(before):
+	for i in range(0, len(before['model_data'])):
+		print("Testing: " + before['files'][i])
+		fbxTextures = FBXTextures(before['model_data'][i])
+		jsonOut = fbxTextures.get()
+		# 2011 and 2013 export UV's differently to 2012, so we
+		# can only check if the number of indices exported is the same.
+		assert jsonOut["UVIndexCount"] == 1726

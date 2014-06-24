@@ -20,10 +20,10 @@ __Note:__ I have C# code prepared for other iterations of the FBX file format, h
 	* Vertices, VertexCount, VertexIndexCount, VertexIndices, EdgeCount, Edges
 * __Normals Information__
 	* NormalsCount, Normals
-
-####Upcoming/Planned Features
 * __UV's__
 	* UV Coordinates, UVIndex
+
+####Upcoming/Planned Features
 * __Properties__
 	* GlobalProperties, Documents, (more) Header Data, Metadata
 * __Animation__

@@ -24,6 +24,7 @@ from .unit import before
 from ..pyfbx.FBXVertices import FBXVertices
 from ..pyfbx.FBXNormals import FBXNormals
 from ..pyfbx.FBXHeader import FBXHeader
+from ..pyfbx.FBXTextures import FBXTextures
 
 def test_vertices_consistency(before):
 	# Test each instance of model data. Although the reader
@@ -40,6 +41,13 @@ def test_vertices_consistency(before):
 		jsonOut = fbxVertices.get()["Vertices"]
 		assert jsonOut[0] == [4.894176483154297, -5.2721147537231445, 33.48030090332031]
 		assert jsonOut[len(jsonOut) - 1] == [27.58094024658203, 0.4144550561904907, 26.248268127441406]
+
+		# 2011 and 2013 export UV's differently to 2012, so we
+		# can only check if the format of UVs is consistent for the
+		# first entry.
+		fbxTextures = FBXTextures(before['model_data'][i])
+		jsonOut = fbxTextures.get()["UVIndices"]
+		assert jsonOut[0] == [0, 3, 2]
 
 		# Edge and normal values are idempotent per version, but
 		# export slightly differently across versions. As such, consistency

@@ -19,62 +19,32 @@ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR P
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-import sys
-import re
-import struct
-from pyfbx.FBXHeader import FBXHeader
-from pyfbx.FBXVertices import FBXVertices
-from pyfbx.FBXNormals import FBXNormals
-from pyfbx.FBXTextures import FBXTextures
-import pprint
-import json
+from .FBXBase import FBXBase
+from .FBXHeader import FBXHeader
 
-def openFile(name):
-	print("Opening FBX File...")
-	f = open(name, mode='rb')
-	return f
+class FBXTextures(FBXBase):
 
-def closeFile(f):
-	print("Closing FBX File...")
-	f.close()
+	info = { }
 
-if(__name__ == "__main__"):
-	pp = pprint.PrettyPrinter(indent=4, width=40)
+	def __init__(self, fbxBits):
+		super().__init__(fbxBits)
 
-	if len(sys.argv) < 2:
-		sys.exit("Usage: pyFBX.py fbx_file");
+		self.header = FBXHeader(fbxBits)
+		self.read_uvs()
 
-	f = openFile(sys.argv[1])
+	def read_uvs(self):
+		self.info["UVCount"], self.info["UV"] = self.parse_section("\2UV", "UVIndex", self.FLOAT2, lambda count: count/2)
+		self.info["UVIndexCount"], self.info["UVIndices"] = self.parse_section("UVIndex", "LayerElementMaterial", self.INT3, lambda count: count/3)
 
-	if f:
-		# Read the entire file for searching
-		fstr = f.read()
-		closeFile(f)
+		# UV Indices are muddled in 2011 and 2013.
+		affectedVersions = [7100, 7300]
+		if self.header.get()["FBXVersion"] in affectedVersions:
+			for i in range(0, len(self.info["UVIndices"])):
+				uv = self.info["UVIndices"][i]
+				self.info["UVIndices"][i] = [uv[1], uv[2], uv[0]]
 
-		try:
-			jsonOut = { }
-			fOut = open(sys.argv[1] + '.json', mode='w')
+	def get(self, key=None):
+		if key:
+			return self.info[key]
 
-			fbxHeader = FBXHeader(fstr)
-			jsonOut["header"] = fbxHeader.get()
-
-			fbxVertices = FBXVertices(fstr)
-			jsonOut["mesh"] = fbxVertices.get()
-
-			fbxNormals = FBXNormals(fstr)
-			jsonOut["normals"] = fbxNormals.get()
-
-			fbxTextures = FBXTextures(fstr)
-			jsonOut["textures"] = fbxTextures.get()
-
-			print("Dumping JSON...")
-			fOut.write("/**\n* Autodesk/Kaydara FBX to JSON Conversion Tool\n* Niall Frederick Weedon\n* niallweedon.co.uk\n* github.com/nweedon\n*/\n")
-			fOut.write(json.dumps(jsonOut, sort_keys=True, indent=4))
-
-			fOut.close()
-		except:
-			import traceback, sys
-			traceback.print_exc(file=sys.stdout)
-		finally:
-			print("Finished.")
-			sys.exit(-1);
+		return self.info
